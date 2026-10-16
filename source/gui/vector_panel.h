@@ -57,7 +57,7 @@ struct Backend {
     virtual Item item(const char* id, V2 a, V2 b) = 0;                    // an interactive rectangle
     virtual void tooltip(const char* t) = 0;
     virtual void lcd(V2 a, V2 b) = 0;                                     // the backlit LCD glass into (a, b)
-        virtual void logo(V2 a, V2 b, uint32_t tint) = 0;                 // <--- added this one
+        virtual void logo(V2 a, V2 b, uint32_t tint) { (void)a; (void)b; (void)tint; }
     // What follows changes while the machine runs (LEDs, keys, pot pointers) - true - or is the printed
     // panel - false. A backend may keep the printed panel as a picture and redraw only the rest.
     virtual void layer(bool dynamic) { (void)dynamic; }
