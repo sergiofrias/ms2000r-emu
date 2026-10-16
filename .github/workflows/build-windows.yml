@@ -1,0 +1,52 @@
+name: Build MS2000BR VST3 (Windows)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # Allows GitHub to publish to your Releases
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout code with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Configure CMake
+        shell: bash
+        run: |
+          cmake -S . -B build_vst \
+            -G "Visual Studio 17 2022" -A x64 \
+            -DMS2K_BUILD_VST3=ON \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build VST3 Release
+        run: |
+          cmake --build build_vst --config Release --target MS2000R_Shim --parallel
+
+      - name: Package VST3 Bundle
+        shell: powershell
+        run: |
+          Compress-Archive -Path "build_vst\VST3_multi\MS2000R.vst3" -DestinationPath "MS2000BR-Windows-VST3.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.9.8-ms2000br
+          name: "KORG MS2000BR VST3 (Windows x64)"
+          body: |
+            Custom build of the MS2000R VST3 featuring the limited-edition **MS2000BR Charcoal** front panel skin and branding.
+            
+            ### Installation:
+            1. Extract `MS2000BR-Windows-VST3.zip`.
+            2. Copy `MS2000R.vst3` into:
+               `C:\Program Files\Common Files\VST3\`
+            3. Ensure your `flash.bin` and `boot-362.bin` ROMs are placed in your Documents/MS2000R folder.
+          files: MS2000BR-Windows-VST3.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
