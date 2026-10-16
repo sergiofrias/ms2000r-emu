@@ -57,6 +57,7 @@ struct Backend {
     virtual Item item(const char* id, V2 a, V2 b) = 0;                    // an interactive rectangle
     virtual void tooltip(const char* t) = 0;
     virtual void lcd(V2 a, V2 b) = 0;                                     // the backlit LCD glass into (a, b)
+        virtual void logo(V2 a, V2 b, uint32_t tint) = 0;                 // <--- added this one
     // What follows changes while the machine runs (LEDs, keys, pot pointers) - true - or is the printed
     // panel - false. A backend may keep the printed panel as a picture and redraw only the rest.
     virtual void layer(bool dynamic) { (void)dynamic; }
@@ -281,9 +282,9 @@ inline void draw(IO& io, Backend& be, V2 pos, V2 avail)
     frame(c, 213, 812, 1818, 900);
     frame(c, 1352, 70, 1422, 140); text(c, 1387, 78, "ORIGINAL", 13); text(c, 1387, 93, "VALUE", 13);
     // ---------------- MS2000BR LOGO & BRANDING ----------------
-    textBold(c, 1035, 50,  "KORG", 38.0f, -1, 1.4f);
-    textBold(c, 1035, 88,  "MS2000BR", 32.0f, -1, 1.0f);
-    text(c, 1035, 126, "ANALOG MODELING SYNTHESIZER / VOCODER", 11.0f, -1);
+    const float lx = 1035.0f, ly = 42.0f;
+    const float lh = 96.0f, lw = lh * (799.0f / 355.0f);
+    c.b->logo(c.P(lx, ly), c.P(lx + lw, ly + lh), cPrint());
 
     // ---------------- AUDIO IN, POWER/VOLUME, PHONES ----------------
     text(c, 57, 70, "1 /", 15, 1); text(c, 80, 70, "INST", 15, 0, true);
