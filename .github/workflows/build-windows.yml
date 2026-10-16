@@ -32,6 +32,13 @@ jobs:
       - name: Package VST3 Bundle
         shell: powershell
         run: |
+          # 1. Create the Resources folder inside the VST3 bundle
+          New-Item -ItemType Directory -Force -Path "build_vst\VST3_multi\MS2000R.vst3\Contents\Resources"
+          
+          # 2. Copy the logo from source/gui/logo.png into the bundle
+          Copy-Item "source\gui\logo.png" -Destination "build_vst\VST3_multi\MS2000R.vst3\Contents\Resources\logo.png"
+          
+          # 3. Zip the entire bundle including the logo
           Compress-Archive -Path "build_vst\VST3_multi\MS2000R.vst3" -DestinationPath "MS2000BR-Windows-VST3.zip"
 
       - name: Create GitHub Release
