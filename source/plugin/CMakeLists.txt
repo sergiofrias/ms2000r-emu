@@ -29,6 +29,11 @@ target_compile_definitions(MS2000R_VST PUBLIC
 target_link_libraries(MS2000R_VST PRIVATE ms2000
     juce::juce_audio_utils juce::juce_audio_processors
     PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+    # logo.png embedded in the plugin (BinaryData::logo_png)
+juce_add_binary_data(MS2000R_Assets
+    SOURCES ${CMAKE_SOURCE_DIR}/source/gui/logo.png)
+set_target_properties(MS2000R_Assets PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(MS2000R_VST PRIVATE MS2000R_Assets)
 
 # A console host that loads the built .vst3 like a DAW does and renders a note through processBlock.
 juce_add_console_app(MS2000R_HostTest PRODUCT_NAME "MS2000R_HostTest")
