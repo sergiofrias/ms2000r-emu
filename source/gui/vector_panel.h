@@ -88,11 +88,11 @@ struct Ctx {
 };
 
 // colours
-inline uint32_t cPanel()  { return RGBA(44, 96, 114, 255); }   // the R's steel-teal (Tamas' photo)
-inline uint32_t cFrame()  { return RGBA(178, 204, 214, 255); }
-inline uint32_t cPrint()  { return RGBA(236, 242, 244, 255); }
-inline uint32_t cInvBg()  { return RGBA(206, 220, 226, 255); }
-inline uint32_t cInvFg()  { return RGBA(44, 96, 114, 255); }
+inline uint32_t cPanel()  { return RGBA(46, 49, 52, 255); }   // Matte dark charcoal chassis
+inline uint32_t cFrame()  { return RGBA(140, 146, 150, 255); } // Neutral gray frame borders
+inline uint32_t cPrint()  { return RGBA(225, 230, 232, 255); } // Crisp off-white silkscreen
+inline uint32_t cInvBg()  { return RGBA(175, 182, 185, 255); } // Inverted background pill
+inline uint32_t cInvFg()  { return RGBA(46, 49, 52, 255); }   // Inverted foreground text
 
 // text centred (align 0), left (-1) or right (+1) on x, top at y; size in panel units
 inline void text(const Ctx& c, float x, float y, const char* t, float size = 17.0f, int align = 0, bool inverse = false)
@@ -109,7 +109,15 @@ inline void text(const Ctx& c, float x, float y, const char* t, float size = 17.
         c.b->text(p, px, cPrint(), t);
     }
 }
-
+// ---> INSERT HERE <---
+inline void textBold(const Ctx& c, float x, float y, const char* t, float size, int align = 0, float weight = 1.2f)
+{
+    text(c, x - weight, y, t, size, align);
+    text(c, x + weight, y, t, size, align);
+    text(c, x, y - weight * 0.6f, t, size, align);
+    text(c, x, y + weight * 0.6f, t, size, align);
+    text(c, x, y, t, size, align);
+}
 inline void frame(const Ctx& c, float x0, float y0, float x1, float y1)
 {
     c.b->rect(c.P(x0, y0), c.P(x1, y1), cFrame(), 5.0f * c.s, 1.6f * c.s);
@@ -272,6 +280,10 @@ inline void draw(IO& io, Backend& be, V2 pos, V2 avail)
     frame(c, 213, 657, 1012, 775); text(c, 410, 634, "EG 1 (FILTER)", 20); text(c, 816, 634, "EG 2 (AMP)", 20);
     frame(c, 213, 812, 1818, 900);
     frame(c, 1352, 70, 1422, 140); text(c, 1387, 78, "ORIGINAL", 13); text(c, 1387, 93, "VALUE", 13);
+    // ---------------- MS2000BR LOGO & BRANDING ----------------
+    textBold(c, 1035, 50,  "KORG", 38.0f, -1, 1.4f);
+    textBold(c, 1035, 88,  "MS2000BR", 32.0f, -1, 1.0f);
+    text(c, 1035, 126, "ANALOG MODELING SYNTHESIZER / VOCODER", 11.0f, -1);
 
     // ---------------- AUDIO IN, POWER/VOLUME, PHONES ----------------
     text(c, 57, 70, "1 /", 15, 1); text(c, 80, 70, "INST", 15, 0, true);
