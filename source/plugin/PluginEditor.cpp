@@ -6,6 +6,7 @@
 // backend on juce::Graphics whose items are passive (no new presses, no drag), so drawing changes nothing.
 // The timer (30 Hz) reads the LEDs and the LCD and repaints only when something the panel shows changed.
 #include "PluginEditor.h"
+#include <BinaryData.h>
 #include <cstring>
 
 namespace {
@@ -15,44 +16,9 @@ const juce::Colour kBg(28, 34, 38);
 juce::Colour col(uint32_t c) { return juce::Colour(juce::uint8(c), juce::uint8(c >> 8), juce::uint8(c >> 16), juce::uint8(c >> 24)); }
 juce::Image s_logo;
 
-#ifdef _WIN32
-#include <windows.h>
-static juce::File getPluginDllDirectory()
+juce::Image loadLogoImage()
 {
-    HMODULE hm = NULL;
-    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
-                           GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                           (LPCSTR)&getPluginDllDirectory, &hm))
-    {
-        char path[MAX_PATH];
-        GetModuleFileNameA(hm, path, sizeof(path));
-        return juce::File(path).getParentDirectory();
-    }
-    return {};
-}
-#endif
-
-juce::Image loadLogoImage(const juce::String& home)
-{
-#ifdef _WIN32
-    const auto dllDir = getPluginDllDirectory();
-#else
-    const auto dllDir = juce::File::getSpecialLocation(juce::File::currentApplicationFile);
-#endif
-
-    for (const auto& f : {
-        juce::File(home).getChildFile("logo.png"),                                              // 1. ROM folder
-        dllDir.getParentDirectory().getChildFile("Resources/logo.png"),                        // 2. Contents/Resources/
-        dllDir.getParentDirectory().getParentDirectory().getChildFile("Resources/logo.png"),  // 3. Fallback Resources
-        dllDir.getChildFile("logo.png"),                                                        // 4. Beside the DLL
-        juce::File::getCurrentWorkingDirectory().getChildFile("logo.png")                       // 5. Working dir
-    }) {
-        if (f.existsAsFile()) {
-            auto img = juce::ImageFileFormat::loadFrom(f);
-            if (img.isValid()) return img;
-        }
-    }
-    return {};
+    return juce::ImageFileFormat::loadFrom(BinaryData::logo_png, BinaryData::logo_pngSize);
 }
 
 // the input pass: no drawing, items from the mouse
@@ -181,7 +147,7 @@ juce::Typeface::Ptr loadPanelFace()
 Ms2kEditor::Ms2kEditor(Ms2kProcessor& p) : AudioProcessorEditor(p), m_proc(p)
 {
     m_face = loadPanelFace();
-    if (!s_logo.isValid()) s_logo = loadLogoImage(m_proc.homePath());
+    if (!s_logo.isValid()) s_logo = loadLogoImage();
     // HD44780 A00 character generator, if the local dump is present (thin_gui's loadCgRom: 16 bytes a
     // character, rows 0-7, 5 low bits). Without it the LCD is drawn as text. The working directory is the
     // MS2000 folder (the processor set it).
