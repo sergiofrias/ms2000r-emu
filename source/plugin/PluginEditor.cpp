@@ -13,6 +13,24 @@ constexpr int kTabH = 30;
 const juce::Colour kBg(28, 34, 38);
 
 juce::Colour col(uint32_t c) { return juce::Colour(juce::uint8(c), juce::uint8(c >> 8), juce::uint8(c >> 16), juce::uint8(c >> 24)); }
+juce::Image s_logo;
+
+juce::Image loadLogoImage(const juce::String& home)
+{
+    const auto exe = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
+    for (const auto& f : {
+        juce::File(home).getChildFile("logo.png"),
+        exe.getSiblingFile("logo.png"),
+        exe.getParentDirectory().getParentDirectory().getChildFile("Resources/logo.png"),
+        juce::File::getCurrentWorkingDirectory().getChildFile("logo.png")
+    }) {
+        if (f.existsAsFile()) {
+            auto img = juce::ImageFileFormat::loadFrom(f);
+            if (img.isValid()) return img;
+        }
+    }
+    return {};
+}
 
 // the input pass: no drawing, items from the mouse
 struct InputBackend final : VPanel::Backend {
@@ -40,6 +58,7 @@ struct InputBackend final : VPanel::Backend {
     }
     void tooltip(const char*) override {}
     void lcd(VPanel::V2, VPanel::V2) override {}
+    void logo(VPanel::V2, VPanel::V2, uint32_t) override {}
 };
 
 // the draw pass: juce::Graphics, passive items
@@ -111,6 +130,12 @@ struct DrawBackend final : VPanel::Backend {
     }
     void tooltip(const char* t) override { tip = t; }
     void lcd(VPanel::V2 a, VPanel::V2 b) override { if (pass == 0) return; flush(); if (lcdFn) lcdFn(R(a, b)); }
+    void logo(VPanel::V2 a, VPanel::V2 b, uint32_t) override
+    {
+        if (skip()) return;
+        flush();
+        if (s_logo.isValid()) g.drawImage(s_logo, R(a, b));
+    }
 };
 
 juce::Typeface::Ptr loadPanelFace()
@@ -133,6 +158,7 @@ juce::Typeface::Ptr loadPanelFace()
 Ms2kEditor::Ms2kEditor(Ms2kProcessor& p) : AudioProcessorEditor(p), m_proc(p)
 {
     m_face = loadPanelFace();
+    if (!s_logo.isValid()) s_logo = loadLogoImage(m_proc.homePath());
     // HD44780 A00 character generator, if the local dump is present (thin_gui's loadCgRom: 16 bytes a
     // character, rows 0-7, 5 low bits). Without it the LCD is drawn as text. The working directory is the
     // MS2000 folder (the processor set it).
