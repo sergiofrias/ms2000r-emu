@@ -15,14 +15,37 @@ const juce::Colour kBg(28, 34, 38);
 juce::Colour col(uint32_t c) { return juce::Colour(juce::uint8(c), juce::uint8(c >> 8), juce::uint8(c >> 16), juce::uint8(c >> 24)); }
 juce::Image s_logo;
 
+#ifdef _WIN32
+#include <windows.h>
+static juce::File getPluginDllDirectory()
+{
+    HMODULE hm = NULL;
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
+                           GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           (LPCSTR)&getPluginDllDirectory, &hm))
+    {
+        char path[MAX_PATH];
+        GetModuleFileNameA(hm, path, sizeof(path));
+        return juce::File(path).getParentDirectory();
+    }
+    return {};
+}
+#endif
+
 juce::Image loadLogoImage(const juce::String& home)
 {
-    const auto exe = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
+#ifdef _WIN32
+    const auto dllDir = getPluginDllDirectory();
+#else
+    const auto dllDir = juce::File::getSpecialLocation(juce::File::currentApplicationFile);
+#endif
+
     for (const auto& f : {
-        juce::File(home).getChildFile("logo.png"),
-        exe.getSiblingFile("logo.png"),
-        exe.getParentDirectory().getParentDirectory().getChildFile("Resources/logo.png"),
-        juce::File::getCurrentWorkingDirectory().getChildFile("logo.png")
+        juce::File(home).getChildFile("logo.png"),                                              // 1. ROM folder
+        dllDir.getParentDirectory().getChildFile("Resources/logo.png"),                        // 2. Contents/Resources/
+        dllDir.getParentDirectory().getParentDirectory().getChildFile("Resources/logo.png"),  // 3. Fallback Resources
+        dllDir.getChildFile("logo.png"),                                                        // 4. Beside the DLL
+        juce::File::getCurrentWorkingDirectory().getChildFile("logo.png")                       // 5. Working dir
     }) {
         if (f.existsAsFile()) {
             auto img = juce::ImageFileFormat::loadFrom(f);
