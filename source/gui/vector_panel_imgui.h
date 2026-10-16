@@ -10,6 +10,7 @@ struct ImGuiBackend final : Backend {
     ImDrawList* dl = nullptr;
     ImFont* f = nullptr;
     std::function<void(ImVec2, ImVec2)> lcdFn;
+    ImTextureID logoTex = 0;                                               // <--- 1. Texture handle
 
     static ImVec2 I(V2 v) { return ImVec2(v.x, v.y); }
     void rectFilled(V2 a, V2 b, uint32_t col, float r) override { dl->AddRectFilled(I(a), I(b), col, r); }
@@ -35,6 +36,11 @@ struct ImGuiBackend final : Backend {
     }
     void tooltip(const char* t) override { ImGui::SetTooltip("%s", t); }
     void lcd(V2 a, V2 b) override { if (lcdFn) lcdFn(I(a), I(b)); }
+    void logo(V2 a, V2 b, uint32_t tint) override                          // <--- 2. Implement logo
+    {
+        if (logoTex)
+            dl->AddImage(logoTex, I(a), I(b), ImVec2(0, 0), ImVec2(1, 1), tint);
+    }
 };
 
 } // namespace VPanel
