@@ -44,11 +44,16 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.9.8-ms2000br
+          tag_name: v0.9.8.1-ms2000br
           name: "KORG MS2000BR VST3 (Windows x64)"
           body: |
-            Custom build of the MS2000R VST3 featuring the limited-edition **MS2000BR Charcoal** front panel skin and branding.
-            
+            Custom build of the MS2000R VST3 featuring the limited-edition **MS2000BR Charcoal** front panel skin.
+
+            > **Notice regarding graphical assets:**  
+            > This build replaces original manufacturer branding with a **custom/alternative logo** to avoid copyright and trademark infringement.
+            >
+            > *Disclaimer: KORG and MS2000 are registered trademarks of Korg Inc. This is an unofficial, independent build and is not affiliated with, endorsed by, or sponsored by Korg Inc.*
+
             ### Installation:
             1. Extract `MS2000BR-Windows-VST3.zip`.
             2. Copy `MS2000R.vst3` into:
